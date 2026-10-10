@@ -2,6 +2,7 @@
 // Contract owner: project lead. Do not change signatures without telling the lead.
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 

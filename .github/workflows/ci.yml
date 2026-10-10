@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build clawd
+        run: cmake --build build --target clawd --config Release
+
+      - name: Self test and smoke run (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          ./build/clawd --selftest
+          ./build/clawd --frames 3 --seed 1
+
+      - name: Self test and smoke run (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          .\build\Release\clawd.exe --selftest
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\build\Release\clawd.exe --frames 3 --seed 1
